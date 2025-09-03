@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BTGB Scenario Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0a0f0d; --card:#111916; --border:#1d2623; --text:#eef2f0; --muted:#b8c2bf;
+      --accent:#11d36a; --accent-soft:#11d36a22; --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:var(--bg); color:var(--text); font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    header{padding:20px 16px; border-bottom:2px solid var(--accent); background:#111716; text-align:center}
+    header h1{margin:0 0 6px; font-size:clamp(20px,3.2vw,28px)}
+    header p{margin:0; color:var(--muted); font-size:14px}
+    main{max-width:1000px; margin:20px auto; padding:0 16px}
+    .grid{display:grid; gap:16px; grid-template-columns:1.1fr 1fr}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px}
+    h2{margin:0 0 10px; font-size:18px}
+    label{font-weight:600; font-size:14px; display:block; margin:8px 0 6px}
+    select,textarea,input[type="text"]{
+      width:100%; background:#0e1412; color:var(--text); border:1px solid var(--border);
+      border-radius:12px; padding:12px 14px; outline:none; transition:border .2s, box-shadow .2s
+    }
+    select:focus,textarea:focus,input[type="text"]:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+    textarea{min-height:120px; resize:vertical}
+    .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:999px; background:#0e1412}
+    .pill input{accent-color:var(--accent)}
+    .muted{color:var(--muted); font-size:12px}
+    .buttons{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    button{padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer; background:#0f1714; border:1px solid var(--border); color:var(--text)}
+    button.primary{background:linear-gradient(90deg,#1cff8a,#11d36a); color:#06150d; border-color:#0aa95a}
+    button.ghost{background:transparent}
+    .output{background:#0b110f; border:1px solid var(--border); border-radius:12px; min-height:220px; padding:16px; white-space:pre-wrap; line-height:1.55}
+    .topbar{display:flex; align-items:center; gap:12px; margin-bottom:10px}
+    .badge{display:inline-block; padding:4px 10px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:#9adfbe}
+    .progress{flex:1; height:6px; background:#0d1311; border:1px solid var(--border); border-radius:999px; overflow:hidden}
+    .progress>span{display:block; height:100%; width:0%; background:linear-gradient(90deg,#1cff8a,#11d36a); transition:width .2s}
+    .logoChip{width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:900; color:#072d19;
+      background: radial-gradient(100% 100% at 30% 20%, #1aff89 0%, #0eb65c 45%, #0a8644 100%); margin:0 auto 8px}
+    .cta{margin-top:6px; font-size:12px; color:#9fd8bf; text-align:center}
+    .kbd{display:inline-block; border:1px solid var(--border); border-bottom-width:2px; padding:0 6px; border-radius:6px; font-size:12px; background:#0f1614}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logoChip">BTGB</div>
+    <h1>BlackTech Green-Book — Scenario Simulator</h1>
+    <p>Welcome to BlackTech Green-Book, your go-to resource for navigating the tech world as a Black professional.</p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <!-- Controls -->
+      <section class="card" aria-labelledby="controlsTitle">
+        <div class="topbar">
+          <span id="stepLbl" class="badge">Scenario 1 of 5</span>
+          <div class="progress" aria-label="Scenario Progress"><span id="bar" style="width:20%"></span></div>
+          <button id="prevBtn" title="Previous">◀︎</button>
+          <button id="nextBtn" title="Next">▶︎</button>
+        </div>
+
+        <h2 id="controlsTitle">Pick a scenario or write your own</h2>
+
+        <label for="presetSelect">Preset scenarios</label>
+        <select id="presetSelect" aria-label="Preset scenarios"></select>
+
+        <div class="row" style="margin-top:6px">
+          <label class="pill"><input type="checkbox" id="useCustom"> Use custom scenario</label>
+          <span class="muted">Toggle to type your exact situation.</span>
+        </div>
+
+        <div id="customWrap" style="display:none">
+          <label for="customText">Your scenario</label>
+          <textarea id="customText" placeholder="What happened? Who? What outcome do you want (e.g., set a boundary, secure credit, align on promotion path)?"></textarea>
+        </div>
+
+        <label style="margin-top:10px">Response style</label>
+        <div class="row">
+          <label class="pill"><input type="radio" name="style" value="direct" checked> Direct &amp; Respectful (Command-Switching)</label>
+          <label class="pill"><input type="radio" name="style" value="diplomatic"> Diplomatic &amp; Data-Led (Peace + Pressure)</label>
+        </div>
+
+        <div class="buttons">
+          <button id="generateBtn" class="primary">Generate Guidance</button>
+          <button id="clearBtn" class="ghost">Clear</button>
+        </div>
+        <p class="cta">Pro tip: press <span class="kbd">⌘</span>/<span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to generate.</p>
+      </section>
+
+      <!-- Output -->
+      <section class="card" aria-labelledby="outputTitle">
+        <h2 id="outputTitle">Coach Output</h2>
+        <div id="out" class="output" role="region" aria-live="polite"></div>
+        <div class="buttons">
+          <button id="copyBtn">Copy</button>
+          <button id="dlBtn" class="ghost">Download .txt</button>
+        </div>
+        <p class="muted">Call to action: If this helped, like, subscribe, and share BlackTech Green-Book with a colleague.</p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // ===== Data =====
+    const PRESETS = [
+      { id:1, title:"Credit Snatch in Sprint Review", text:"In a sprint review, a teammate frames your work as theirs. You want to correct the record calmly, protect your brand, and avoid drama."},
+      { id:2, title:"Microaggression in Stand-Up", text:"A colleague calls your communication 'aggressive' when you were clear. You want to address it without being dismissed."},
+      { id:3, title:"Performance Review Curveball", text:"You receive vague negative feedback with no examples. You want specifics, aligned expectations, and a promotion-ready plan."},
+      { id:4, title:"Interruption & Idea Theft", text:"You’re interrupted; someone repeats your idea and gets credit. You want to reclaim authorship and build public attribution allies."},
+      { id:5, title:"Code-Switching vs Command-Switching", text:"A senior leader questions your tone. You want to switch to a firm, respectful command style that signals leadership."}
+    ];
+
+    // ===== Elements =====
+    const presetSelect = document.getElementById('presetSelect');
+    const useCustom    = document.getElementById('useCustom');
+    const customWrap   = document.getElementById('customWrap');
+    const customText   = document.getElementById('customText');
+    const out          = document.getElementById('out');
+    const stepLbl      = document.getElementById('stepLbl');
+    const bar          = document.getElementById('bar');
+    const prevBtn      = document.getElementById('prevBtn');
+    const nextBtn      = document.getElementById('nextBtn');
+    const generateBtn  = document.getElementById('generateBtn');
+    const clearBtn     = document.getElementById('clearBtn');
+    const copyBtn      = document.getElementById('copyBtn');
+    const dlBtn        = document.getElementById('dlBtn');
+
+    // ===== State =====
+    let idx = 0;
+
+    // ===== Init UI =====
+    function populateSelect(){
+      presetSelect.innerHTML = '';
+      for(const s of PRESETS){
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = `${s.id}. ${s.title}`;
+        presetSelect.appendChild(opt);
+      }
+      presetSelect.value = PRESETS[0].id;
+    }
+
+    function updateStepper(){
+      stepLbl.textContent = `Scenario ${idx+1} of ${PRESETS.length}`;
+      bar.style.width = `${((idx+1)/PRESETS.length)*100}%`;
+      // sync select
+      presetSelect.value = PRESETS[idx].id;
+    }
+
+    function getStyle(){
+      return document.querySelector('input[name="style"]:checked')?.value || 'direct';
+    }
+
+    function getScenarioText(){
+      if(useCustom.checked){
+        return (customText.value || '').trim();
+      }
+      return PRESETS[idx].text;
+    }
+
+    // ===== Guidance (built-in, offline) =====
+    function guidance({scenarioText, style}){
+      const check = [
+        "1) Clarify your goal: protect brand, fix the issue, keep relationships workable.",
+        "2) Anchor to artifacts: tickets, commits, docs, dates.",
+        "3) Command-Switching: respectful, concise, steady, standards without apology.",
+        "4) Ask for next steps in writing; recap via email/ticket.",
+        "5) Track patterns to protect your future self."
+      ].join("\n");
+
+      if(style === 'diplomatic'){
+        return [
+          "BTGB Coach (Diplomatic & Data-Led):",
+          "",
+          "• Situation:",
+          scenarioText,
+          "",
+          "• Strategy:",
+          "- Start with shared goals (delivery, quality, reliability).",
+          "- Use neutral language; point to artifacts, not opinions.",
+          "- Invite partnership while quietly setting boundaries.",
+          "",
+          "• Script:",
+          "“Team, to keep delivery clean: the retry-logic refactor tracks to my ticket [TH-2178] and PR #482. I’ll walk through the design and results in the next demo so handoffs are clear. Appreciate everyone’s input.”",
+          "",
+          "• If they deflect:",
+          "“Understood. I’ll send a short recap with links so we’re all aligned on ownership and next steps.”",
+          "",
+          "• Follow-Up Checklist:",
+          check
+        ].join("\n");
+      } else {
+        return [
+          "BTGB Coach (Direct & Respectful):",
+          "",
+          "• Situation:",
+          scenarioText,
+          "",
+          "• Strategy:",
+          "- Open calm; use names, timeboxes, and artifacts (JIRA, PR, commit IDs).",
+          "- Focus on clarity and impact, not feelings.",
+          "- Make a specific ask; secure agreement in writing.",
+          "",
+          "• Script:",
+          "“Quick clarity: the payment-retry refactor was completed under my ticket [TH-2178] and merged in PR #482 on Monday. For the next demo, I’ll present changes and outcomes so dependencies are clear. Sound good?”",
+          "",
+          "• If they push back:",
+          "“I’m focused on clarity so we move faster. I’ll send a recap with links so we’re aligned.”",
+          "",
+          "• Follow-Up Checklist:",
+          check
+        ].join("\n");
+      }
+    }
+
+    // ===== Events =====
+    function syncIndexFromSelect(){
+      const id = Number(presetSelect.value);
+      const newIdx = PRESETS.findIndex(s => s.id === id);
+      if(newIdx >= 0){ idx = newIdx; updateStepper(); }
+    }
+
+    presetSelect.addEventListener('change', syncIndexFromSelect);
+
+    prevBtn.addEventListener('click', ()=>{
+      idx = (idx - 1 + PRESETS.length) % PRESETS.length;
+      updateStepper();
+    });
+
+    nextBtn.addEventListener('click', ()=>{
+      idx = (idx + 1) % PRESETS.length;
+      updateStepper();
+    });
+
+    useCustom.addEventListener('change', ()=>{
+      customWrap.style.display = useCustom.checked ? 'block' : 'none';
+    });
+
+    generateBtn.addEventListener('click', ()=>{
+      const text = getScenarioText();
+      if(!text){
+        out.textContent = "Please type your custom scenario or choose a preset.";
+        return;
+      }
+      out.textContent = guidance({scenarioText:text, style:getStyle()});
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      out.textContent = '';
+      if(useCustom.checked) customText.value = '';
+    });
+
+    copyBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(out.textContent || "");
+        copyBtn.textContent = "Copied ✓";
+        setTimeout(()=> copyBtn.textContent = "Copy", 1200);
+      }catch(e){
+        alert("Copy failed. Select text and press Ctrl/Cmd+C.");
+      }
+    });
+
+    dlBtn.addEventListener('click', ()=>{
+      const blob = new Blob([out.textContent || ""], {type:"text/plain"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "btgb_coach_output.txt";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    document.addEventListener('keydown', (e)=>{
+      if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ generateBtn.click(); }
+    });
+
+    // ===== Boot =====
+    (function boot(){
+      populateSelect();
+      updateStepper();
+      customText.value =
+        "Write your scenario here:\n• Who did what (facts)?\n• What impact on delivery/clarity/reputation?\n• Desired outcome (boundary, alignment, promotion path)?";
+    })();
+  </script>
+</body>
+</html>

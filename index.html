@@ -2,289 +2,621 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>BTGB Scenario Simulator</title>
+
+  <!-- Brand font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root{
-      --bg:#0a0f0d; --card:#111916; --border:#1d2623; --text:#eef2f0; --muted:#b8c2bf;
-      --accent:#11d36a; --accent-soft:#11d36a22; --radius:14px;
+      --btgb-bg:#0a0f0d;
+      --btgb-card:#111716;
+      --btgb-accent:#11d36a;
+      --btgb-accent-soft:#11d36a22;
+      --btgb-text:#eef2f0;
+      --btgb-muted:#b8c2bf;
+      --btgb-border:#1d2623;
+      --btgb-danger:#ff6565;
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --shadow-soft:0 6px 18px rgba(0,0,0,.25);
     }
     *{box-sizing:border-box}
-    body{margin:0; background:var(--bg); color:var(--text); font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-    header{padding:20px 16px; border-bottom:2px solid var(--accent); background:#111716; text-align:center}
-    header h1{margin:0 0 6px; font-size:clamp(20px,3.2vw,28px)}
-    header p{margin:0; color:var(--muted); font-size:14px}
-    main{max-width:1000px; margin:20px auto; padding:0 16px}
-    .grid{display:grid; gap:16px; grid-template-columns:1.1fr 1fr}
-    @media (max-width:980px){.grid{grid-template-columns:1fr}}
-    .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px}
-    h2{margin:0 0 10px; font-size:18px}
-    label{font-weight:600; font-size:14px; display:block; margin:8px 0 6px}
-    select,textarea,input[type="text"]{
-      width:100%; background:#0e1412; color:var(--text); border:1px solid var(--border);
-      border-radius:12px; padding:12px 14px; outline:none; transition:border .2s, box-shadow .2s
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Poppins, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 10% -10%, var(--btgb-accent-soft), transparent 60%),
+        radial-gradient(900px 500px at 110% 10%, var(--btgb-accent-soft), transparent 60%),
+        var(--btgb-bg);
+      color:var(--btgb-text);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
-    select:focus,textarea:focus,input[type="text"]:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+    header{
+      max-width:1000px; margin:24px auto 12px; padding:0 16px; text-align:center;
+    }
+    .logo-wrap{display:flex; align-items:center; justify-content:center; gap:14px;}
+    .logo-badge{
+      width:56px; height:56px; border-radius:14px;
+      background: radial-gradient(100% 100% at 30% 20%, #1aff89 0%, #0eb65c 45%, #0a8644 100%);
+      box-shadow:0 6px 18px rgba(17,211,106,.35), inset 0 0 18px rgba(255,255,255,.15);
+      display:grid; place-items:center; color:#03150c; font-weight:900; letter-spacing:.5px;
+    }
+    h1{margin:10px 0 6px; font-size:clamp(20px, 3.2vw, 30px); letter-spacing:.4px;}
+    .tagline{color:var(--btgb-muted); margin:0; font-size:14px}
+    .cta{margin-top:6px; font-size:12px; color:#9fd8bf}
+
+    main{max-width:1000px; margin:18px auto 36px; padding:0 16px;}
+    .grid{display:grid; gap:16px; grid-template-columns:1.1fr 1fr;}
+    @media (max-width: 980px){ .grid{grid-template-columns: 1fr;} }
+
+    .card{
+      background:linear-gradient(180deg, #111916 0%, #0f1513 100%);
+      border:1px solid var(--btgb-border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .card h2{margin:0 0 12px; font-size:18px}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    label{font-weight:600; font-size:14px}
+
+    select, textarea, input[type="text"]{
+      width:100%; border-radius:12px; background:#0e1412; color:var(--btgb-text);
+      border:1px solid var(--btgb-border); padding:12px 14px; outline:none;
+      transition:border .2s ease, box-shadow .2s ease;
+    }
+    select:focus, textarea:focus, input[type="text"]:focus{
+      border-color:var(--btgb-accent);
+      box-shadow:0 0 0 3px var(--btgb-accent-soft);
+    }
     textarea{min-height:120px; resize:vertical}
-    .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
-    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid var(--border); border-radius:999px; background:#0e1412}
-    .pill input{accent-color:var(--accent)}
-    .muted{color:var(--muted); font-size:12px}
-    .buttons{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
-    button{padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer; background:#0f1714; border:1px solid var(--border); color:var(--text)}
-    button.primary{background:linear-gradient(90deg,#1cff8a,#11d36a); color:#06150d; border-color:#0aa95a}
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      border:1px solid var(--btgb-border); background:#0e1412; cursor:pointer; user-select:none;
+      transition:transform .05s ease;
+    }
+    .pill input{accent-color:var(--btgb-accent)}
+    .pill:hover{transform:translateY(-1px)}
+    .muted{color:var(--btgb-muted); font-size:12px}
+
+    .buttons{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    button{
+      border:1px solid var(--btgb-border); background:#0f1714; color:var(--btgb-text);
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; box-shadow:var(--shadow-soft);
+    }
+    button.primary{border-color:#0aa95a; background:linear-gradient(90deg, #0ab460, #08a055); color:#06150d;}
     button.ghost{background:transparent}
-    .output{background:#0b110f; border:1px solid var(--border); border-radius:12px; min-height:220px; padding:16px; white-space:pre-wrap; line-height:1.55}
-    .topbar{display:flex; align-items:center; gap:12px; margin-bottom:10px}
-    .badge{display:inline-block; padding:4px 10px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:#9adfbe}
-    .progress{flex:1; height:6px; background:#0d1311; border:1px solid var(--border); border-radius:999px; overflow:hidden}
-    .progress>span{display:block; height:100%; width:0%; background:linear-gradient(90deg,#1cff8a,#11d36a); transition:width .2s}
-    .logoChip{width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:900; color:#072d19;
-      background: radial-gradient(100% 100% at 30% 20%, #1aff89 0%, #0eb65c 45%, #0a8644 100%); margin:0 auto 8px}
-    .cta{margin-top:6px; font-size:12px; color:#9fd8bf; text-align:center}
-    .kbd{display:inline-block; border:1px solid var(--border); border-bottom-width:2px; padding:0 6px; border-radius:6px; font-size:12px; background:#0f1614}
+    button.danger{border-color:#3d1e1e; background:#1b0f0f; color:#ff9a9a}
+
+    .note{font-size:12px; color:#9adfbe; margin-top:6px}
+    .warn{font-size:12px; color:#ffcaa6; margin-top:6px}
+
+    .output{
+      background:#0b110f; border:1px solid var(--btgb-border); border-radius:12px; padding:16px;
+      min-height:220px; line-height:1.55; white-space:pre-wrap;
+    }
+    .stepper{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;}
+    .progressbar{flex:1; height:6px; background:#0d1311; border-radius:999px; overflow:hidden; border:1px solid var(--btgb-border);}
+    .progressbar > span{display:block; height:100%; width:0%; background:linear-gradient(90deg,#1cff8a,#11d36a); transition:width .2s ease;}
+
+    /* Settings modal */
+    .modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:16px; z-index:50;}
+    .modal{max-width:520px; width:100%; background:#0f1513; border:1px solid var(--btgb-border);
+      border-radius:16px; box-shadow:var(--shadow); padding:18px}
+    .modal h3{margin:0 0 8px}
+    .small{font-size:12px; color:var(--btgb-muted)}
+    .disclaimer{font-size:12px; color:#e3c39f}
+    .badge{display:inline-block; padding:3px 8px; border:1px solid var(--btgb-border); border-radius:999px; font-size:11px; color:#9adfbe}
+    .kbd{display:inline-block; border:1px solid var(--btgb-border); border-bottom-width:2px; padding:1px 6px; border-radius:6px; font-size:12px; background:#0f1614}
   </style>
 </head>
 <body>
   <header>
-    <div class="logoChip">BTGB</div>
-    <h1>BlackTech Green-Book — Scenario Simulator</h1>
-    <p>Welcome to BlackTech Green-Book, your go-to resource for navigating the tech world as a Black professional.</p>
+    <div class="logo-wrap">
+      <div class="logo-badge">BTGB</div>
+      <div>
+        <h1>BlackTech Green-Book — Scenario Simulator</h1>
+        <p class="tagline">Welcome to BlackTech Green-Book, your go-to resource for navigating the tech world as a Black professional.</p>
+        <p class="cta">Use the presets or write your own scenario. Choose a style, generate guidance, then copy & apply.</p>
+      </div>
+    </div>
   </header>
 
   <main>
     <div class="grid">
-      <!-- Controls -->
-      <section class="card" aria-labelledby="controlsTitle">
-        <div class="topbar">
-          <span id="stepLbl" class="badge">Scenario 1 of 5</span>
-          <div class="progress" aria-label="Scenario Progress"><span id="bar" style="width:20%"></span></div>
-          <button id="prevBtn" title="Previous">◀︎</button>
-          <button id="nextBtn" title="Next">▶︎</button>
+      <!-- LEFT: Controls -->
+      <section class="card">
+        <div class="stepper">
+          <span class="badge" id="stepText">Scenario 1 of 5</span>
+          <div class="progressbar" aria-label="Scenario Progress">
+            <span id="progressFill" style="width:20%"></span>
+          </div>
+          <button id="settingsBtn" class="ghost" title="Settings (API Key)">⚙️ Settings</button>
         </div>
 
-        <h2 id="controlsTitle">Pick a scenario or write your own</h2>
-
-        <label for="presetSelect">Preset scenarios</label>
-        <select id="presetSelect" aria-label="Preset scenarios"></select>
-
-        <div class="row" style="margin-top:6px">
-          <label class="pill"><input type="checkbox" id="useCustom"> Use custom scenario</label>
-          <span class="muted">Toggle to type your exact situation.</span>
+        <div class="row" style="margin-bottom:10px">
+          <label for="scenarioSelect">Preset scenario</label>
+          <select id="scenarioSelect" aria-label="Choose a preset scenario"></select>
         </div>
 
-        <div id="customWrap" style="display:none">
-          <label for="customText">Your scenario</label>
-          <textarea id="customText" placeholder="What happened? Who? What outcome do you want (e.g., set a boundary, secure credit, align on promotion path)?"></textarea>
+        <div class="row" style="margin-bottom:4px">
+          <label class="pill" title="Type your own scenario">
+            <input type="checkbox" id="customToggle" />
+            <span>Use custom scenario</span>
+          </label>
+          <span class="muted">Toggle to override the preset with your own situation.</span>
         </div>
 
-        <label style="margin-top:10px">Response style</label>
+        <div class="row" id="customRow" style="display:none">
+          <label for="customInput">Your scenario (what happened, who, and your goal)</label>
+          <textarea id="customInput" placeholder="Ex: My manager credits my work to someone else during the sprint review. I want to address it without starting drama, but still protect my reputation."></textarea>
+        </div>
+
         <div class="row">
-          <label class="pill"><input type="radio" name="style" value="direct" checked> Direct &amp; Respectful (Command-Switching)</label>
-          <label class="pill"><input type="radio" name="style" value="diplomatic"> Diplomatic &amp; Data-Led (Peace + Pressure)</label>
+          <label class="pill" title="Include HR and legal-safety steps">
+            <input type="checkbox" id="includeHR" checked />
+            <span>Include HR & Legal protocol</span>
+          </label>
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <label>Response style</label>
+          <div class="row">
+            <label class="pill"><input type="radio" name="style" value="direct" checked /> Direct & Respectful (Command-Switching)</label>
+            <label class="pill"><input type="radio" name="style" value="diplomatic" /> Diplomatic & Data-Led (Peace + Pressure)</label>
+          </div>
         </div>
 
         <div class="buttons">
+          <button id="prevBtn">◀︎ Previous</button>
+          <button id="nextBtn">Next ▶︎</button>
           <button id="generateBtn" class="primary">Generate Guidance</button>
           <button id="clearBtn" class="ghost">Clear</button>
         </div>
-        <p class="cta">Pro tip: press <span class="kbd">⌘</span>/<span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to generate.</p>
+
+        <p class="note">Pro tip: press <span class="kbd">⌘</span>/<span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> to generate.</p>
+        <p class="warn">This tool offers general guidance, not legal advice. Policies differ by employer and jurisdiction—consult HR or an attorney for specific questions.</p>
       </section>
 
-      <!-- Output -->
-      <section class="card" aria-labelledby="outputTitle">
-        <h2 id="outputTitle">Coach Output</h2>
-        <div id="out" class="output" role="region" aria-live="polite"></div>
+      <!-- RIGHT: Output -->
+      <section class="card">
+        <h2>Coach Output</h2>
+        <div class="output" id="output" role="region" aria-live="polite"></div>
         <div class="buttons">
           <button id="copyBtn">Copy</button>
-          <button id="dlBtn" class="ghost">Download .txt</button>
+          <button id="downloadBtn" class="ghost">Download .txt</button>
+          <button id="resetKeyBtn" class="danger" title="Forget stored API key">Forget API Key</button>
         </div>
-        <p class="muted">Call to action: If this helped, like, subscribe, and share BlackTech Green-Book with a colleague.</p>
+        <p class="muted">No API key? The app returns built-in BTGB guidance. Add a key in Settings (⚙️) for fully dynamic responses to your custom scenario.</p>
       </section>
     </div>
   </main>
 
+  <!-- Settings Modal -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Settings</h3>
+      <p class="small">Optional: use your own model provider. Your key is stored in <b>this browser only</b> (localStorage) and never committed.</p>
+
+      <label for="apiProvider" style="font-weight:600">Provider</label>
+      <select id="apiProvider" style="margin-bottom:8px">
+        <option value="none">No API (built-in responses)</option>
+        <option value="openai">OpenAI</option>
+      </select>
+
+      <div id="apiSection" style="display:none">
+        <label for="apiKey" style="font-weight:600">API Key</label>
+        <input type="text" id="apiKey" placeholder="Paste your key (kept locally)" />
+        <p class="small">Model: <input type="text" id="modelName" value="gpt-4o-mini" style="width:210px" /> &nbsp; Base URL: <input type="text" id="baseUrl" value="https://api.openai.com/v1" style="width:240px" /></p>
+        <p class="disclaimer">Security note: Browser-side keys can be extracted by advanced users. For production, use a small proxy server to protect secrets.</p>
+      </div>
+
+      <div class="buttons" style="margin-top:10px">
+        <button id="saveSettings" class="primary">Save</button>
+        <button id="closeSettings" class="ghost">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // ===== Data =====
-    const PRESETS = [
-      { id:1, title:"Credit Snatch in Sprint Review", text:"In a sprint review, a teammate frames your work as theirs. You want to correct the record calmly, protect your brand, and avoid drama."},
-      { id:2, title:"Microaggression in Stand-Up", text:"A colleague calls your communication 'aggressive' when you were clear. You want to address it without being dismissed."},
-      { id:3, title:"Performance Review Curveball", text:"You receive vague negative feedback with no examples. You want specifics, aligned expectations, and a promotion-ready plan."},
-      { id:4, title:"Interruption & Idea Theft", text:"You’re interrupted; someone repeats your idea and gets credit. You want to reclaim authorship and build public attribution allies."},
-      { id:5, title:"Code-Switching vs Command-Switching", text:"A senior leader questions your tone. You want to switch to a firm, respectful command style that signals leadership."}
-    ];
+  /*******************************
+   * BTGB Scenario Simulator
+   * - Custom scenario prefers API if configured
+   * - HR/Legal protocol section (optional)
+   * - Built-in offline guidance as fallback
+   *******************************/
 
-    // ===== Elements =====
-    const presetSelect = document.getElementById('presetSelect');
-    const useCustom    = document.getElementById('useCustom');
-    const customWrap   = document.getElementById('customWrap');
-    const customText   = document.getElementById('customText');
-    const out          = document.getElementById('out');
-    const stepLbl      = document.getElementById('stepLbl');
-    const bar          = document.getElementById('bar');
-    const prevBtn      = document.getElementById('prevBtn');
-    const nextBtn      = document.getElementById('nextBtn');
-    const generateBtn  = document.getElementById('generateBtn');
-    const clearBtn     = document.getElementById('clearBtn');
-    const copyBtn      = document.getElementById('copyBtn');
-    const dlBtn        = document.getElementById('dlBtn');
+  const presetScenarios = [
+    { id: 1, title: "Credit Snatch in the Sprint Review", text: "In a sprint review, a teammate (and sometimes the manager) frames your work as theirs. You want to correct the record calmly, protect your brand, and avoid unnecessary drama." },
+    { id: 2, title: "Microaggression in a Stand-Up", text: "A colleague uses loaded language about your communication style (e.g., 'aggressive', 'too intense'). You want to address it in the moment or shortly after, without being dismissed." },
+    { id: 3, title: "Performance Review Curveball", text: "You get vague negative feedback with no examples. You want to ask for specifics, align on expectations, and set a concrete plan that positions you for promotion." },
+    { id: 4, title: "Meeting Interruption & Idea Theft", text: "You’re interrupted, then someone repeats your idea and gets credit. You want to reclaim authorship gracefully and build allies who publicly attribute correctly." },
+    { id: 5, title: "Code-Switching vs Command-Switching", text: "A senior leader questions your tone. You want to switch to a firm, respectful command style that signals leadership without diluting your message." }
+  ];
 
-    // ===== State =====
-    let idx = 0;
+  // --- HR/Legal protocol (general, non-legal advice)
+  function hrLegalBlock(scenarioText){
+    return [
+"— — —",
+"Action Items — HR & Legal Protocol (General)",
+"1) Document Facts:",
+"   • Write a dated account (who/what/when/where), keep emails, chat logs, ticket links, calendar invites, witnesses.",
+"   • Save to a private location you control.",
+"",
+"2) Check Policy:",
+"   • Read your Employee Handbook/Code of Conduct and any Anti-Harassment/DEI/Performance Review policies.",
+"   • Note the formal complaint channels and timelines.",
+"",
+"3) Contact HR (sample email):",
+"   Subject: Request for confidential guidance on workplace incident",
+"   Hi [HR Name],",
+"   I’d like confidential guidance regarding an incident that occurred on [date] involving [names/teams].",
+"   Here are the facts and artifacts: [bullets/links].",
+"   My goals are: [clarity/safety/fair attribution/mediation].",
+"   Please advise on next steps and the appropriate process. Thank you.",
+"   — [Your Name, Title, Team]",
+"",
+"4) Escalation Path:",
+"   • If your manager is involved, send HR directly and CC a skip-level only if policy allows.",
+"   • Ask HR for a case/ticket number and timeline for follow-up.",
+"",
+"5) Meetings & Paper Trail:",
+"   • In HR/manager meetings, bring written notes. After, send a recap email with agreed actions, owners, and dates.",
+"",
+"6) Safety & Legal:",
+"   • If you feel unsafe or believe protected-class discrimination may be involved, ask HR about interim safeguards (no-retaliation, temp reporting lines).",
+"   • Consider confidential consultation with an employment lawyer in your state for situational advice.",
+"",
+"7) External Options (US-centric):",
+"   • If internal remedies fail or retaliation occurs, explore agencies like EEOC/state civil rights offices. Deadlines apply.",
+"",
+"Disclaimer: This is general information, not legal advice. Laws and policies vary by employer and jurisdiction."
+    ].join("\n");
+  }
 
-    // ===== Init UI =====
-    function populateSelect(){
-      presetSelect.innerHTML = '';
-      for(const s of PRESETS){
-        const opt = document.createElement('option');
-        opt.value = s.id;
-        opt.textContent = `${s.id}. ${s.title}`;
-        presetSelect.appendChild(opt);
-      }
-      presetSelect.value = PRESETS[0].id;
+  // Built-in BTGB guidance (offline)
+  function buildLocalResponse({ scenarioText, style, includeHR }){
+    const voiceIntro = "BTGB Coach (OG engineer tone):";
+    const common = [
+      "1) Clarify the goal (protect your brand, fix the issue, keep relationships workable).",
+      "2) Lead with facts, not vibes. Anchor to tickets, commits, docs, dates.",
+      "3) Use Command-Switching: respectful, concise, steady pace, no apology for standards.",
+      "4) Ask for next steps in writing. Recap via email or ticket.",
+      "5) Document patterns. Protect your future self."
+    ].join("\n");
+
+    const templates = {
+      direct:
+`${voiceIntro}
+
+• Situation:
+${scenarioText}
+
+• Strategy (Direct & Respectful):
+- Open with calm presence. Use names, timeboxes, and artifacts (JIRA, PR #, commit IDs).
+- State impact on delivery and clarity, not on feelings.
+- Make a specific ask and secure agreement in writing.
+
+• Script (in the room or 1:1):
+“Quick note for clarity: the refactor for the payment retry logic was completed under my ticket [TH-2178] and merged in PR #482 on Monday. For the next demo, I’ll present the changes and outcomes so the team understands dependencies. Sound good?”
+
+If they push back:
+“I’m focused on clarity so we can move faster as a team. The record shows ownership; I’ll send a short recap with links so we’re aligned.”
+
+• Follow-Up (email / ticket comment):
+- 3 bullets: what happened, artifacts (links), agreed next step + owner + date.
+- CC your manager if the pattern repeats.
+
+• BTGB Checklist:
+${common}
+${includeHR ? "\n" + hrLegalBlock(scenarioText) : ""}`,
+
+      diplomatic:
+`${voiceIntro}
+
+• Situation:
+${scenarioText}
+
+• Strategy (Diplomatic & Data-Led):
+- Start with shared goals (delivery, quality, reliability).
+- Use neutral language and artifacts to anchor the conversation.
+- Invite partnership while quietly setting a boundary.
+
+• Script (in the room or 1:1):
+“Team, to keep our delivery clean: the payment retry logic refactor tracks to my ticket [TH-2178] and PR #482. I’ll walk through the design choices and results in the next demo so handoffs are clear. Appreciate everyone’s input.”
+
+If they deflect:
+“Understood. I’ll drop a short recap with links so we’re all synced on ownership and next actions.”
+
+• Follow-Up (email / ticket comment):
+- Summarize decisions, list owners & dates, attach links.
+- Thank collaborators by name to lock in attribution socially.
+
+• BTGB Checklist:
+${common}
+${includeHR ? "\n" + hrLegalBlock(scenarioText) : ""}`
+    };
+
+    return templates[style] || templates.direct;
+  }
+
+  // --- UI state
+  let currentIndex = 0;
+  const scenarioSelect = document.getElementById("scenarioSelect");
+  const customToggle   = document.getElementById("customToggle");
+  const customRow      = document.getElementById("customRow");
+  const customInput    = document.getElementById("customInput");
+  const includeHRBox   = document.getElementById("includeHR");
+  const outputEl       = document.getElementById("output");
+  const stepText       = document.getElementById("stepText");
+  const progressFill   = document.getElementById("progressFill");
+  const prevBtn        = document.getElementById("prevBtn");
+  const nextBtn        = document.getElementById("nextBtn");
+  const generateBtn    = document.getElementById("generateBtn");
+  const clearBtn       = document.getElementById("clearBtn");
+  const copyBtn        = document.getElementById("copyBtn");
+  const downloadBtn    = document.getElementById("downloadBtn");
+  const resetKeyBtn    = document.getElementById("resetKeyBtn");
+
+  // Settings modal
+  const modalBackdrop  = document.getElementById("modalBackdrop");
+  const settingsBtn    = document.getElementById("settingsBtn");
+  const closeSettings  = document.getElementById("closeSettings");
+  const saveSettings   = document.getElementById("saveSettings");
+  const apiProviderSel = document.getElementById("apiProvider");
+  const apiSection     = document.getElementById("apiSection");
+  const apiKeyInput    = document.getElementById("apiKey");
+  const modelNameInput = document.getElementById("modelName");
+  const baseUrlInput   = document.getElementById("baseUrl");
+
+  // Populate presets
+  function populateSelect(){
+    scenarioSelect.innerHTML = "";
+    for(const s of presetScenarios){
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = `${s.id}. ${s.title}`;
+      scenarioSelect.appendChild(opt);
     }
+    scenarioSelect.value = presetScenarios[0].id;
+  }
 
-    function updateStepper(){
-      stepLbl.textContent = `Scenario ${idx+1} of ${PRESETS.length}`;
-      bar.style.width = `${((idx+1)/PRESETS.length)*100}%`;
-      // sync select
-      presetSelect.value = PRESETS[idx].id;
+  function updateStepper(){
+    stepText.textContent = `Scenario ${currentIndex+1} of ${presetScenarios.length}`;
+    const pct = ((currentIndex+1)/presetScenarios.length)*100;
+    progressFill.style.width = `${pct}%`;
+    scenarioSelect.value = presetScenarios[currentIndex].id;
+  }
+
+  function getSelectedStyle(){
+    return document.querySelector('input[name="style"]:checked')?.value || "direct";
+  }
+
+  function getScenarioText(){
+    if(customToggle.checked){
+      return (customInput.value || "").trim();
     }
+    return presetScenarios[currentIndex].text;
+  }
 
-    function getStyle(){
-      return document.querySelector('input[name="style"]:checked')?.value || 'direct';
-    }
+  function renderOutput(text){ outputEl.textContent = text; }
 
-    function getScenarioText(){
-      if(useCustom.checked){
-        return (customText.value || '').trim();
-      }
-      return PRESETS[idx].text;
-    }
+  // API settings
+  const STORAGE_KEY = "btgb_scenario_settings_v1";
+  function saveLocalSettings(data){ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  function loadLocalSettings(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {provider:"none", apiKey:"", model:"gpt-4o-mini", baseUrl:"https://api.openai.com/v1"};
+    }catch(e){ return {provider:"none", apiKey:"", model:"gpt-4o-mini", baseUrl:"https://api.openai.com/v1"}; }
+  }
+  function applySettingsToUI(){
+    const s = loadLocalSettings();
+    apiProviderSel.value = s.provider || "none";
+    apiKeyInput.value = s.apiKey || "";
+    modelNameInput.value = s.model || "gpt-4o-mini";
+    baseUrlInput.value = s.baseUrl || "https://api.openai.com/v1";
+    apiSection.style.display = (s.provider === "openai") ? "block" : "none";
+  }
 
-    // ===== Guidance (built-in, offline) =====
-    function guidance({scenarioText, style}){
-      const check = [
-        "1) Clarify your goal: protect brand, fix the issue, keep relationships workable.",
-        "2) Anchor to artifacts: tickets, commits, docs, dates.",
-        "3) Command-Switching: respectful, concise, steady, standards without apology.",
-        "4) Ask for next steps in writing; recap via email/ticket.",
-        "5) Track patterns to protect your future self."
-      ].join("\n");
+  // OpenAI call
+  async function callOpenAI({ baseUrl, apiKey, model, scenarioText, style, includeHR }){
+    const system = `You are BTGB Coach: a 55-year-old Black tech OG—street-smart, professional, concise.
+Avoid the words "game-changer" and "shrink/ing".
+Use respectful command-switching.
+Return: Strategy bullets, a short script, a pushback line, a follow-up checklist${includeHR ? ", and an 'Action Items — HR & Legal Protocol' section with general (jurisdiction-agnostic) steps and a short HR email template" : ""}. 
+Do NOT provide legal advice; include a one-line disclaimer only.`;
 
-      if(style === 'diplomatic'){
-        return [
-          "BTGB Coach (Diplomatic & Data-Led):",
-          "",
-          "• Situation:",
-          scenarioText,
-          "",
-          "• Strategy:",
-          "- Start with shared goals (delivery, quality, reliability).",
-          "- Use neutral language; point to artifacts, not opinions.",
-          "- Invite partnership while quietly setting boundaries.",
-          "",
-          "• Script:",
-          "“Team, to keep delivery clean: the retry-logic refactor tracks to my ticket [TH-2178] and PR #482. I’ll walk through the design and results in the next demo so handoffs are clear. Appreciate everyone’s input.”",
-          "",
-          "• If they deflect:",
-          "“Understood. I’ll send a short recap with links so we’re all aligned on ownership and next steps.”",
-          "",
-          "• Follow-Up Checklist:",
-          check
-        ].join("\n");
-      } else {
-        return [
-          "BTGB Coach (Direct & Respectful):",
-          "",
-          "• Situation:",
-          scenarioText,
-          "",
-          "• Strategy:",
-          "- Open calm; use names, timeboxes, and artifacts (JIRA, PR, commit IDs).",
-          "- Focus on clarity and impact, not feelings.",
-          "- Make a specific ask; secure agreement in writing.",
-          "",
-          "• Script:",
-          "“Quick clarity: the payment-retry refactor was completed under my ticket [TH-2178] and merged in PR #482 on Monday. For the next demo, I’ll present changes and outcomes so dependencies are clear. Sound good?”",
-          "",
-          "• If they push back:",
-          "“I’m focused on clarity so we move faster. I’ll send a recap with links so we’re aligned.”",
-          "",
-          "• Follow-Up Checklist:",
-          check
-        ].join("\n");
-      }
-    }
+    const user = `SCENARIO:\n${scenarioText}\n\nSTYLE: ${style === "direct" ? "Direct & Respectful (Command-Switching)" : "Diplomatic & Data-Led (Peace + Pressure)"}\n\nFORMAT:\n- Strategy (4 bullets)\n- Script (4–6 sentences)\n- If they push back (2 lines)\n- Follow-up Checklist (3 bullets)${includeHR ? "\n- Action Items — HR & Legal Protocol (bulleted, short email template, one-line disclaimer)" : ""}`;
 
-    // ===== Events =====
-    function syncIndexFromSelect(){
-      const id = Number(presetSelect.value);
-      const newIdx = PRESETS.findIndex(s => s.id === id);
-      if(newIdx >= 0){ idx = newIdx; updateStepper(); }
-    }
+    const url = baseUrl.replace(/\/+$/,"") + "/chat/completions";
+    const payload = {
+      model,
+      temperature: 0.6,
+      messages: [
+        {role:"system", content: system},
+        {role:"user", content: user}
+      ]
+    };
 
-    presetSelect.addEventListener('change', syncIndexFromSelect);
-
-    prevBtn.addEventListener('click', ()=>{
-      idx = (idx - 1 + PRESETS.length) % PRESETS.length;
-      updateStepper();
+    const res = await fetch(url, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Authorization":"Bearer " + apiKey },
+      body: JSON.stringify(payload)
     });
 
-    nextBtn.addEventListener('click', ()=>{
-      idx = (idx + 1) % PRESETS.length;
-      updateStepper();
-    });
+    if(!res.ok){
+      const errText = await res.text();
+      throw new Error(`API error ${res.status}: ${errText}`);
+    }
+    const data = await res.json();
+    return (data.choices?.[0]?.message?.content || "").trim();
+  }
 
-    useCustom.addEventListener('change', ()=>{
-      customWrap.style.display = useCustom.checked ? 'block' : 'none';
-    });
+  // Generate
+  async function generate(){
+    const style = getSelectedStyle();
+    const scenarioText = getScenarioText();
+    const includeHR = includeHRBox.checked;
 
-    generateBtn.addEventListener('click', ()=>{
-      const text = getScenarioText();
-      if(!text){
-        out.textContent = "Please type your custom scenario or choose a preset.";
+    if(!scenarioText){
+      renderOutput("Please enter a custom scenario or pick a preset.");
+      return;
+    }
+
+    const settings = loadLocalSettings();
+
+    // If it's a custom scenario, PREFER API if configured
+    if(customToggle.checked){
+      if(settings.provider === "openai" && settings.apiKey){
+        renderOutput("Generating with your API…");
+        try{
+          const text = await callOpenAI({
+            baseUrl: settings.baseUrl,
+            apiKey: settings.apiKey,
+            model: settings.model,
+            scenarioText, style, includeHR
+          });
+          renderOutput(text);
+          return;
+        }catch(err){
+          renderOutput(`(API failed — showing built-in guidance)\n\n` + buildLocalResponse({ scenarioText, style, includeHR }) + `\n\n— Error: ${err.message}`);
+          return;
+        }
+      }else{
+        renderOutput(`(No API key set — using built-in guidance)\n\n` + buildLocalResponse({ scenarioText, style, includeHR }) + `\n\nTip: Click ⚙️ Settings to add your OpenAI key for dynamic results.`);
         return;
       }
-      out.textContent = guidance({scenarioText:text, style:getStyle()});
-    });
+    }
 
-    clearBtn.addEventListener('click', ()=>{
-      out.textContent = '';
-      if(useCustom.checked) customText.value = '';
-    });
-
-    copyBtn.addEventListener('click', async ()=>{
+    // Preset scenarios -> API optional; otherwise built-in
+    renderOutput("Generating…");
+    if(settings.provider === "openai" && settings.apiKey){
       try{
-        await navigator.clipboard.writeText(out.textContent || "");
-        copyBtn.textContent = "Copied ✓";
-        setTimeout(()=> copyBtn.textContent = "Copy", 1200);
-      }catch(e){
-        alert("Copy failed. Select text and press Ctrl/Cmd+C.");
+        const text = await callOpenAI({
+          baseUrl: settings.baseUrl,
+          apiKey: settings.apiKey,
+          model: settings.model,
+          scenarioText, style, includeHR
+        });
+        renderOutput(text);
+      }catch(err){
+        renderOutput(`(API failed — showing built-in guidance)\n\n` + buildLocalResponse({ scenarioText, style, includeHR }) + `\n\n— Error: ${err.message}`);
       }
-    });
+    }else{
+      renderOutput(buildLocalResponse({ scenarioText, style, includeHR }));
+    }
+  }
 
-    dlBtn.addEventListener('click', ()=>{
-      const blob = new Blob([out.textContent || ""], {type:"text/plain"});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = "btgb_coach_output.txt";
-      document.body.appendChild(a); a.click(); a.remove();
-      URL.revokeObjectURL(url);
-    });
+  // Events
+  scenarioSelect.addEventListener("change", (e)=>{
+    const id = Number(e.target.value);
+    const idx = presetScenarios.findIndex(s=>s.id===id);
+    if(idx>=0){ currentIndex = idx; updateStepper(); }
+  });
 
-    document.addEventListener('keydown', (e)=>{
-      if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){ generateBtn.click(); }
-    });
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  prevBtn.addEventListener("click", ()=>{
+    currentIndex = (currentIndex - 1 + presetScenarios.length) % presetScenarios.length;
+    updateStepper();
+  });
+  nextBtn.addEventListener("click", ()=>{
+    currentIndex = (currentIndex + 1) % presetScenarios.length;
+    updateStepper();
+  });
 
-    // ===== Boot =====
-    (function boot(){
-      populateSelect();
-      updateStepper();
-      customText.value =
-        "Write your scenario here:\n• Who did what (facts)?\n• What impact on delivery/clarity/reputation?\n• Desired outcome (boundary, alignment, promotion path)?";
-    })();
+  const generateBtn = document.getElementById("generateBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const copyBtn = document.getElementById("copyBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
+
+  const customToggle = document.getElementById("customToggle");
+  const customRow = document.getElementById("customRow");
+  customToggle.addEventListener("change", ()=>{
+    customRow.style.display = customToggle.checked ? "block" : "none";
+  });
+
+  generateBtn.addEventListener("click", generate);
+  clearBtn.addEventListener("click", ()=> renderOutput(""));
+
+  copyBtn.addEventListener("click", async ()=>{
+    try{
+      await navigator.clipboard.writeText(outputEl.textContent || "");
+      copyBtn.textContent = "Copied ✓";
+      setTimeout(()=> copyBtn.textContent = "Copy", 1200);
+    }catch{ /* ignore */ }
+  });
+
+  downloadBtn.addEventListener("click", ()=>{
+    const blob = new Blob([outputEl.textContent || ""], {type:"text/plain"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "btgb_coach_output.txt";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  // Keyboard shortcut: Cmd/Ctrl + Enter
+  document.addEventListener("keydown", (e)=>{
+    if((e.metaKey || e.ctrlKey) && e.key === "Enter"){ generate(); }
+  });
+
+  // Settings modal
+  const settingsBtn = document.getElementById("settingsBtn");
+  const closeSettings = document.getElementById("closeSettings");
+  const saveSettings = document.getElementById("saveSettings");
+  const modalBackdrop = document.getElementById("modalBackdrop");
+  const resetKeyBtn = document.getElementById("resetKeyBtn");
+
+  settingsBtn.addEventListener("click", ()=>{
+    applySettingsToUI();
+    modalBackdrop.style.display = "flex";
+    modalBackdrop.setAttribute("aria-hidden","false");
+  });
+  closeSettings.addEventListener("click", ()=>{
+    modalBackdrop.style.display = "none";
+    modalBackdrop.setAttribute("aria-hidden","true");
+  });
+  document.getElementById("apiProvider").addEventListener("change", ()=>{
+    apiSection.style.display = apiProviderSel.value === "openai" ? "block" : "none";
+  });
+  saveSettings.addEventListener("click", ()=>{
+    const data = {
+      provider: apiProviderSel.value,
+      apiKey: apiKeyInput.value.trim(),
+      model: modelNameInput.value.trim() || "gpt-4o-mini",
+      baseUrl: baseUrlInput.value.trim() || "https://api.openai.com/v1"
+    };
+    saveLocalSettings(data);
+    modalBackdrop.style.display = "none";
+    modalBackdrop.setAttribute("aria-hidden","true");
+  });
+  resetKeyBtn.addEventListener("click", ()=>{
+    const s = loadLocalSettings(); s.apiKey = ""; s.provider = "none";
+    saveLocalSettings(s); applySettingsToUI();
+    renderOutput("API key cleared. Using built-in BTGB guidance.");
+  });
+
+  // Init
+  function populateSelect(){
+    scenarioSelect.innerHTML = "";
+    for(const s of presetScenarios){
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = `${s.id}. ${s.title}`;
+      scenarioSelect.appendChild(opt);
+    }
+    scenarioSelect.value = presetScenarios[0].id;
+  }
+
+  populateSelect();
+  updateStepper();
+  applySettingsToUI();
+  customInput.value = "Write your scenario here:\n• Who said/did what? (facts only)\n• What impact did it have on delivery, clarity, or reputation?\n• What outcome do you want (boundary, alignment, promotion path)?";
   </script>
 </body>
 </html>
